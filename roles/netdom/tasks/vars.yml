@@ -1,0 +1,23 @@
+domu_name: netdom
+vcpus: 1
+memory: 512
+
+bridges:
+  - name: int0
+    ipv4:
+      network: 192.168.111.1/24
+      dhcp:
+        range:
+          from: 50
+          to: 100
+        # TODO: static hosts
+
+pci:
+  - "00:08.0"
+
+dnsmasq_extra:
+  - "no-hosts"
+  - "no-resolv"
+  - "no-poll"
+  - "server=/int.lab/10.0.1.53/"
+  - "server=8.8.8.8"

@@ -1,0 +1,62 @@
+---
+- name: Update APK cache
+  apk: update_cache=yes
+
+- name: Ensure netdom packages are installed
+  apk:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - bridge
+    - dnsmasq
+    - ip6tables
+    - iptables
+    - xen
+
+- name: Ensure xendriverdomain is started
+  # TODO: investigate if there is a bug here where xl devd not always starts
+  service:
+    name: xendriverdomain
+    enabled: yes
+    state: started
+
+- name: Ensure bridge interface directory is present
+  file:
+    path: /etc/network/interfaces.d
+    state: directory
+
+- name: Ensure bridge interface file is correct
+  template:
+    src: templates/interface.j2
+    dest: /etc/network/interfaces.d/{{ item.name }}
+  with_items: "{{ bridges }}"
+
+- name: Ensure bridge interfaces are sourced
+  lineinfile:
+    path: '/etc/network/interfaces'
+    line: "source /etc/network/interfaces.d/{{ item.name }}"
+  with_items: "{{ bridges }}"
+
+- name: Ensure bridge interface is up
+  command: ifup "{{ item.name }}"
+  with_items: "{{ bridges }}"
+
+- name: Generate dnsmasq bridge configuration
+  template:
+    src: templates/00-bridge.conf.j2
+    dest: /etc/dnsmasq.d/00-bridge-{{ item.name }}.conf
+    validate: 'dnsmasq --test -C %s'
+  with_items: "{{ bridges }}"
+
+- name: Generate dnsmasq extra configuration
+  template:
+    src: templates/99-extra.conf.j2
+    dest: /etc/dnsmasq.d/99-extra.conf
+    validate: 'dnsmasq --test -C %s'
+  when: dnsmasq_extra is defined
+
+- name: Ensure dnsmasq is running with new configuration
+  service:
+    name: dnsmasq
+    enabled: true
+    state: restarted

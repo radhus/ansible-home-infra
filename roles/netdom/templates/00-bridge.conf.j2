@@ -1,0 +1,10 @@
+{% set ipv4_host = item.ipv4.network | ipv4('host/prefix') %}
+interface={{ item.name }}
+
+{% if 'dhcp' in item.ipv4 %}
+{% if 'range' in item.ipv4.dhcp %}
+dhcp-range=interface:{{ item.name }},{{ ipv4_host | ipaddr(item.ipv4.dhcp.range.from) | ipaddr('address') }},{{ ipv4_host | ipaddr(item.ipv4.dhcp.range.to) | ipaddr('address') }}
+{% else %}
+dhcp-range=interface:{{ item.name }},{{ ipv4_host | ipaddr('net') | ipaddr('0') }},static
+{% endif %}
+{% endif %}
