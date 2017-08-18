@@ -1,0 +1,37 @@
+#!/sbin/openrc-run
+
+extra_commands="status"
+
+depend() {
+        need xenstored
+        after xend xenconsoled
+        before xendomains
+}
+
+is_running() {
+        false
+}
+
+start() {
+        if [ "${DEVICES}" != "" ]; then
+                attached=$(xl pci-assignable-list)
+                for x in ${DEVICES}; do
+                        if echo "$attached" | grep -qsw "$x"; then
+                          echo "PCI device $x already added - skipping"
+                        else
+                          echo "Adding PCI device $x to Xen"
+                          xl pci-assignable-add $x
+                        fi
+                done
+        else
+                echo "Devices is empty"
+        fi
+}
+
+stop() {
+        true
+}
+
+status() {
+        true
+}
