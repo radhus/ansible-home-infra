@@ -1,0 +1,17 @@
+domu_name: storagedom
+vcpus: 1
+memory: 8192
+
+pci:
+  - "00:02.0"
+
+zpool:
+  name: tank
+  vdevs:
+    - mirror:
+      - /dev/sda
+      - /dev/sdb
+  slog:
+    - /dev/vg0/slog0
+
+vm_zvol_path: it/vms

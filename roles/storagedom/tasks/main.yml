@@ -1,0 +1,33 @@
+---
+# Based on running environment and documentation on:
+# https://community.riocities.com/xen_storage_driver_domain.html
+
+- name: Ensure contrib repository is enabled
+  apt_repository:
+    repo: deb http://ftp.se.debian.org/debian/ stretch main contrib non-free
+    state: present
+
+- name: Update APT cache
+  apt: update_cache=yes
+
+- name: Check if ZFS is installed and loaded
+  shell: zpool list
+  register: zpool_list
+  ignore_errors: true
+
+- name: Install and load ZFS
+  include: install-zfs.yml
+  when: zpool_list.rc != 0
+
+  # TODO: use zpool_facts
+- name: Check if zpool is created
+  shell: zpool status "{{ zpool.name }}"
+  register: zpool_status
+  ignore_errors: true
+
+- name: Ensure zpool is created
+  include: create-zpool.yml
+  when: zpool_status.rc != 0
+
+- name: Install and configure Xen storage domain packages
+  include: install-xen-packages.yml

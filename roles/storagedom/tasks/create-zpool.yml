@@ -1,0 +1,10 @@
+---
+- name: Fail due to not yet implemented or tested
+  fail: msg="Not yet implemented"
+
+- name: Create zpool
+  command: zpool create -o ashift=12 "{{ zpool.name }}" "{{ zpool.vdevs | filter_zfs_vdev }}"
+
+- name: Create paths to store VMs zvols
+  # TODO: make compression configurable
+  command: zfs create -p -o compression=lz4 "{{ zpool.name }}/{{ vm_zvol_path }}"

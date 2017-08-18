@@ -1,0 +1,83 @@
+---
+- name: Ensure services not running during installation
+  copy:
+    dest: /usr/sbin/policy-rc.d
+    mode: 0755
+    content: |
+      #!/bin/sh
+      exit 101
+
+- name: Install Xen packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    install_recommends: no
+  with_items:
+    - xen-utils
+
+- name: Allow services again
+  file:
+    path: /usr/sbin/policy-rc.d
+    state: absent
+
+- name: Disable Xen services adapted to dom0's
+  service:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  with_items:
+    - xen
+    - xendomains
+
+- name: Ensure xenfs is mounted
+  mount:
+    fstype: xenfs
+    path: /proc/xen
+    src: xenfs
+    state: present
+
+- name: Ensure systemd unit for xl devd is present
+  copy:
+    dest: /etc/systemd/system/xl-devd.service
+    mode: 0644
+    content: |
+      [Unit]
+      Description=Xen driver domain
+      Requires=proc-xen.mount
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/sbin/xl devd -F
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Ensure systemd unit for xenstore startup notice is present
+  copy:
+    dest: /etc/systemd/system/xenstore-startup-notice.service
+    mode: 0644
+    content: |
+      [Unit]
+      Description=Xenstore startup notice
+      Requires=xl-devd.service
+
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/sh -c '\
+        /usr/bin/xenstore-write \
+          /local/domain/`/usr/bin/xenstore-read domid`/data/storage-online \
+          1'
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable Xen services
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  with_items:
+    - proc-xen.mount
+    - xl-devd.service
+    - xenstore-startup-notice.service
