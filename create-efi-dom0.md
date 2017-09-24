@@ -103,7 +103,7 @@ $ lbu commit
 
 ### Copy Xen boot files
 
-**NOTE:** due to a bug in current Xen APKBUILD, the Xen efi files are stored in `/usr/lib64/efi/xen`. See PR (aports#1513)[https://github.com/alpinelinux/aports/pull/1513] for discussion.
+**NOTE:** due to a bug in current Xen APKBUILD, the Xen efi files are stored in `/usr/lib64/efi/xen`. See PR [aports#1513](https://github.com/alpinelinux/aports/pull/1513) for discussion.
 
 **NOTE:** since symlinks isn't supported on vfat, this wastes quite some space...
 
