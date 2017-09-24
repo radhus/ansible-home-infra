@@ -6,11 +6,11 @@ This guide will create an installation of diskless Alpine with Xen dom0 support,
 
 **NOTE:** the official Alpine installation medium doesn't support EFI, so create the installed medium by booting it with BIOS/compatibility mode.
 
-This guide assumes `alpine-xen-3.6.2-x86_64.iso` is used as boot medium, and is booted now.
+This guide assumes `alpine-xen-3.6.2-x86_64.iso` is used as boot medium, and is booted before continuing.
 
 ### Partition disk
 
-Make sure you have internet connectivity, and configure an Alpine mirror:
+Set up internet connectivity and configure to use an Alpine repository mirror:
 ```
 $ ifconfig eth0 up
 $ udhcpc eth0
@@ -24,7 +24,8 @@ Assumptions:
 1. The dom0 disk and EFI ESP is the same partition.
 
 ```
-$ apk add parted
+$ modprobe vfat
+$ apk add parted dosfstools
 $ parted /dev/sda
 (parted) mklabel gpt
 (parted) mkpart ESP fat32 1MiB 1GiB
