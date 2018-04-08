@@ -3,7 +3,12 @@ auto {{ item.name }}
 iface {{ item.name }} inet static
   address {{ ipv4_host | ipaddr('address') }}
   netmask {{ ipv4_host | ipaddr('netmask') }}
+  {% if 'ports' in item -%}
+  {%- set space = joiner(" ") -%}
+  bridge_ports {% for port in item.ports %}{{ space() }}{{ port }}{% endfor %}
+  {%- else -%}
   bridge_ports none
   bridge_stp off
   bridge_waitport 0
   bridge_fd 0
+  {% endif %}

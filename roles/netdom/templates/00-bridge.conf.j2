@@ -5,6 +5,11 @@ interface={{ item.name }}
 {% if 'range' in item.ipv4.dhcp %}
 dhcp-range=interface:{{ item.name }},{{ ipv4_host | ipaddr(item.ipv4.dhcp.range.from) | ipaddr('address') }},{{ ipv4_host | ipaddr(item.ipv4.dhcp.range.to) | ipaddr('address') }}
 {% else %}
-dhcp-range=interface:{{ item.name }},{{ ipv4_host | ipaddr('net') | ipaddr('0') }},static
+dhcp-range=interface:{{ item.name }},{{ ipv4_host | ipaddr('address') }},static,{{ ipv4_host | ipaddr('netmask') }}
+{% endif %}
+{% if 'hosts' in item.ipv4.dhcp %}
+{% for host in item.ipv4.dhcp.hosts %}
+dhcp-host={{ host.mac }},{{ host.ip }},{{ host.hostname }}
+{% endfor %}
 {% endif %}
 {% endif %}
