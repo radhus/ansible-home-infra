@@ -1,4 +1,7 @@
 ---
+- name: Update APT cache
+  apt: update_cache=yes
+
 - name: Ensure services not running during installation
   copy:
     dest: /usr/sbin/policy-rc.d
@@ -81,3 +84,13 @@
     - proc-xen.mount
     - xl-devd.service
     - xenstore-startup-notice.service
+
+- name: Make sure xen-blkback is always loaded
+  lineinfile:
+    path: /etc/modules
+    line: 'xen-blkback'
+
+- name: Make sure xen-blkback is loaded
+  modprobe:
+    name: xen-blkback
+    state: present

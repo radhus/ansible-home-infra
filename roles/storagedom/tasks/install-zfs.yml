@@ -1,4 +1,12 @@
 ---
+- name: Update APT cache
+  apt: update_cache=yes
+
+- name: Ensure contrib repository is enabled
+  apt_repository:
+    repo: deb http://ftp.se.debian.org/debian/ stretch main contrib non-free
+    state: present
+
 - name: Ensure linux-headers are installed
   apt:
     name: "linux-headers"
