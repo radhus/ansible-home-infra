@@ -1,0 +1,35 @@
+k8s_version: v1.10.0
+#k8s_dir: "/opt/bin"
+k8s_dir: "/opt/k8s/{{ k8s_version }}"
+k8s_url: "https://storage.googleapis.com/kubernetes-release/release/{{ k8s_version }}/bin/linux/amd64/"
+
+kubeadm_config_dir: "/etc/kubeadm"
+
+cni_version: v0.6.0
+#cni_dir: "/opt/cni/bin"
+cni_dir: "/opt/cni/{{ cni_version }}"
+cni_url: "https://github.com/containernetworking/plugins/releases/download/{{ cni_version }}/cni-plugins-amd64-{{ cni_version }}.tgz"
+
+cluster_dns: 10.96.0.10
+cluster_domain: cluster.local
+
+service_net: 10.3.0.0/16
+pod_net: 10.4.0.0/16
+
+#local_config: "{{ playbook_dir }}/config"
+
+
+flannel:
+  version: v0.9.1
+  # TODO
+  arch: amd64
+  cni_conf:
+    name: cbr0
+    type: flannel
+    delegate:
+      isDefaultGateway: true
+
+  net_conf:
+    Network: "10.244.0.0/16"
+    Backend:
+      Type: vxlan

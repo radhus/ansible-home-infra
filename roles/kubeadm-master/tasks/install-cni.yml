@@ -1,0 +1,11 @@
+--
+
+- name: Create CNI dir
+  file:
+    path: "{{ cni_dir }}"
+    state: directory
+
+- name: Store CNI binaries
+  src: "{{ cni_url }}"
+  remote_src: yes
+  dest: "{{ cni_dir }}"

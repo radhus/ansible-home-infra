@@ -1,0 +1,25 @@
+---
+# Based on:
+# https://kubernetes.io/docs/setup/independent/install-kubeadm/
+
+- name: Enable Docker daemon
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+
+# Since we'll install update operator
+- name: Disable locksmithd
+  systemd:
+    name: locksmithd
+    masked: yes
+    state: stopped
+
+- name: Install CNI
+  include: install-cni.yml
+
+- name: Install Kubernetes
+  include: install-k8s.yml
+
+- name: Create cluster
+  include: create-cluster.yml

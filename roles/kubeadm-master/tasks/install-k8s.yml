@@ -1,0 +1,43 @@
+--
+
+- name: Create kubenetes binaries dir
+  file:
+    path: "{{ k8s_dir }}"
+    state: directory
+
+- name: Download kubernetes binaries
+  get_url:
+    url: "{{ k8s_url }}{{ item }}"
+    dest: "{{ k8s_dir }}/{{ item }}"
+    mode: 0755
+  with_items:
+    - kubeadm
+    - kubectl
+    - kubelet
+
+- name: Install kubelet service
+  template:
+    src: templates/kubelet.service
+    dest: /etc/systemd/system/kubelet.service
+    mode: 0644
+  register: kubelet_service
+
+- name: Create kubelet service addons dir
+  file:
+    path: /etc/systemd/system/kubelet.service.d
+    state: directory
+
+- name: Configure kubelet for kubeadm use
+  template:
+    src: templates/10-kubeadm.conf
+    dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    mode: 0644
+  register: kubelet_service
+
+- name: Load kubelet.service
+  systemd:
+    name: kubelet.service
+    enabled: yes
+    daemon_reload: yes
+    state: started
+  when: kubelet_service.changed
