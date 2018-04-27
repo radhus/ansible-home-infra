@@ -1,0 +1,15 @@
+---
+
+- name: Update APK cache
+  apk:
+    update_cache: true
+
+- name: Create user
+  include_tasks: user.yml
+  when: create_user is True
+
+- name: Commit changes
+  shell: "{{ item }}"
+  with_items:
+    - lbu commit
+    - apk cache sync

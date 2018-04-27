@@ -1,0 +1,5 @@
+---
+create_user: True
+username: "alpine"
+ssh_key_path: "~/.ssh/id_rsa.pub"
+sudo_nopasswd: True

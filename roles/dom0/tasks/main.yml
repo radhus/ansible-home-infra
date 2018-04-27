@@ -8,12 +8,6 @@
     - lvm2
     - pciutils
     - tmux
-    - xen
-    - xen-hypervisor
-
-# TODO: only on initial
-- name: Setup Dom0
-  command: setup-xen-dom0
 
 - name: Ensure xen-pci scripts are created
   template:
@@ -21,9 +15,6 @@
     dest: "{{ item.dest }}"
     mode: "{{ item.mode }}"
   with_items:
-    - src: xen-pci.init.j2
-      dest: /etc/init.d/xen-pci
-      mode: 755
     - src: xen-pci.conf.j2
       dest: /etc/conf.d/xen-pci
       mode: 644
@@ -40,3 +31,9 @@
     regexp: '^XENDOMAINS_CONSOLE='
     line: 'XENDOMAINS_CONSOLE="tmux"'
     insertafter: '^#XENDOMAINS_CONSOLE='
+
+- name: Commit changes
+  shell: lbu commit
+
+- name: Sync apk cache
+  shell: apk cache sync

@@ -1,0 +1,45 @@
+---
+- name: Install shadow to get useradd
+  apk:
+    name: shadow
+    state: present
+  register: shadow
+
+- name: Create user
+  user:
+    name: "{{ username }}"
+    shell: /bin/ash
+    groups: wheel
+    state: present
+
+- name: Upload public key
+  authorized_key:
+    user: "{{ username }}"
+    state: present
+    key: "{{ lookup('file', ssh_key_path) }}"
+
+- name: Unlock user
+  shell: passwd -d "{{ username }}"
+
+- name: Include user in LBU
+  shell: lbu include "/home/{{ username }}"
+
+- name: Install sudo
+  apk:
+    name: sudo
+    state: present
+
+- name: Allow sudo without password
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^(# )?%wheel.*NOPASSWD'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+  when: sudo_nopasswd == True
+
+- name: Uninstall shadow if wanted
+  apk:
+    name: shadow
+    state: absent
+  when: shadow is changed
