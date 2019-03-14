@@ -1,0 +1,45 @@
+---
+
+- name: Enable @testing
+  lineinfile:
+    path: /etc/apk/repositories
+    regexp: '^@testing '
+    line: '@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing'
+
+- name: Install node-exporter
+  apk:
+    name: prometheus-node-exporter@testing
+    state: present
+    update_cache: true
+
+- name: Enable exporter on boot
+  service:
+    name: node-exporter
+    state: started
+    enabled: yes
+
+- name: Create textfile directory
+  file:
+    path: "{{ textfile_directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Install LBU exporter
+  template:
+    src: lbu_exporter.sh
+    dest: /etc/periodic/15min/lbu_exporter
+    owner: root
+    group: root
+    mode: 0755
+  when: ansible_local.lbu is defined
+
+- name: Configure node_exporter
+  template:
+    src: node-exporter.conf-d.j2
+    dest: /etc/conf.d/node-exporter
+    owner: root
+    group: root
+    mode: 0755
+  notify: restart node-exporter

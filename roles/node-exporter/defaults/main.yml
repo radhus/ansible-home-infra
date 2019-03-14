@@ -1,0 +1,5 @@
+textfile_directory: /var/run/textfile/
+
+node_exporter_default_args:
+  - '--collector.textfile.directory="{{ textfile_directory }}"'
+node_exporter_extra_args: []

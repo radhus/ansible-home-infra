@@ -1,0 +1,11 @@
+# /etc/conf.d/node-exporter
+# NOTE: {{ ansible_managed }}
+
+ARGS=" \
+{% for arg in node_exporter_default_args %}
+    {{ arg }} \
+{% endfor %}
+{% for arg in node_exporter_extra_args %}
+    {{ arg }} \
+{% endfor %}
+"
