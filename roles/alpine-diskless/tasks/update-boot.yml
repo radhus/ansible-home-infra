@@ -1,0 +1,89 @@
+---
+
+- name: Get version
+  block:
+    - name: Get available version
+      docker_container:
+        name: diskless-builder
+        image: radhus/alpine-diskless-updater:latest
+        command:
+          - "/mnt/out"
+          - "{{ alpine_version }}"
+          - "--versions"
+        cleanup: yes
+        detach: no
+        state: started
+      register: available_version_raw
+
+    - name: Trim version
+      set_fact:
+        available_version: "{{ available_version_raw.ansible_facts.docker_container.Output | regex_replace('^linux-(?P<flavor>\\w+)-(?P<kver>[0-9\\.]+)-r(?P<rev>\\d+)\\n$', '\\g<kver>-\\g<rev>-\\g<flavor>') }}"
+
+  delegate_to: localhost
+  become: no
+
+- name: Version comparison
+  debug:
+    msg: "{{ available_version }} > {{ ansible_kernel }} ?"
+
+- name: Update kernel
+  block:
+  - name: Local generation
+    block:
+      - name: Create output directory
+        tempfile:
+          state: directory
+        register: boot_output
+
+      - name: Set updater args
+        set_fact:
+          updater_args:
+            - "/mnt/out"
+            - "{{ alpine_version }}"
+
+      - name: Set xen args
+        set_fact:
+          updater_args: "{{ updater_args + [ '--with-xen' ] }}"
+        when: "alpine_xen"
+
+      - name: Set module args
+        set_fact:
+          updater_args: "{{ updater_args + [ item ]}}"
+        with_items:
+          - "{{ alpine_modules }}"
+
+      - name: Generate boot files
+        docker_container:
+          name: diskless-builder
+          image: radhus/alpine-diskless-updater:latest
+          command: "{{ updater_args }}"
+          volumes:
+            - "{{ boot_output.path }}:/mnt/out"
+          cleanup: yes
+          detach: no
+          state: started
+    delegate_to: localhost
+    become: no
+
+  - name: Remount /boot read-write
+    command: "mount -o remount,rw {{ alpine_boot_mount }}"
+
+  - name: Install /boot files
+    copy:
+      src: "{{ item }}"
+      dest: "{{ alpine_boot_mount }}/boot/"
+    with_fileglob:
+      - "{{ boot_output.path }}/*"
+
+  - name: Remove output directory
+    file:
+      path: "{{ boot_output.path }}"
+      state: absent
+    delegate_to: localhost
+    become: no
+
+  - name: Remount /boot read-only (masked failures)
+    command: "mount -o remount,ro {{ alpine_boot_mount }}"
+    ignore_errors: true
+
+  when: available_version is version(ansible_kernel, operator='>')

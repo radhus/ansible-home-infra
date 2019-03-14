@@ -1,0 +1,9 @@
+alpine_update: false
+alpine_abort_dirty: true
+
+alpine_version: edge
+alpine_xen: false
+alpine_modules: []
+
+updater_args_xen: []
+updater_args_modules: []

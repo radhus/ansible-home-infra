@@ -1,0 +1,19 @@
+---
+
+- name: Create facts directory
+  file:
+    path: /etc/ansible/facts.d
+    state: directory
+
+- name: Install LBU fact
+  template:
+    src: fact-lbu.py
+    dest: /etc/ansible/facts.d/lbu.fact
+    owner: root
+    group: root
+    mode: 0755
+  register: lbufact
+
+- name: Reload facts
+  setup: ~
+  when: lbufact.changed

@@ -1,0 +1,26 @@
+---
+
+- name: Get LBU facts
+  include_tasks: facts.yml
+
+- name: Abort if dirty
+  fail:
+    msg: Not continuing when LBU is dirty
+  when:
+    - alpine_abort_dirty
+    - ansible_facts['ansible_local']['lbu']['dirty']
+
+- name: Update boot
+  include_tasks: update-boot.yml
+  when: alpine_update
+
+- name: Update packages
+  apk:
+    update_cache: true
+    upgrade: true
+  when: alpine_update
+  register: updatepackages
+
+- name: Sync cache
+  command: apk cache sync
+  when: updatepackages.changed
