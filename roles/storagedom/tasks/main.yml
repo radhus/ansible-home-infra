@@ -1,0 +1,24 @@
+---
+# Based on running environment and documentation on:
+# https://community.riocities.com/xen_storage_driver_domain.html
+
+- name: Update APT cache
+  apt: update_cache=yes
+
+- name: Ensure ansible modules are present
+  apt:
+    name: python-apt
+    state: present
+
+- name: Ensure common storage packages are present
+  apt:
+    name:
+      - nfs-kernel-server
+      - smartmontools
+    state: present
+
+- name: Install and load ZFS
+  include: install-zfs.yml
+
+- name: Install and configure Xen storage domain packages
+  include: install-xen-packages.yml
