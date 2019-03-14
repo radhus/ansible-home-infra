@@ -1,0 +1,14 @@
+---
+# TODO: this might not activate new configuration for existing interfaces
+- name: activate interfaces
+  command: ifup "{{ item.key }}"
+  with_dict: "{{ interfaces }}"
+
+- name: restart dnsmasq
+  service:
+    name: dnsmasq
+    enabled: true
+    state: restarted
+
+- name: reload ethers
+  command: arp -f /etc/ethers

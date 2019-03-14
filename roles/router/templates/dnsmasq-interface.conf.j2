@@ -1,0 +1,18 @@
+{% set id = item.key %}
+{% set dhcp = item.value %}
+{% set network = networks[id] %}
+interface={{ dhcp.interface }}
+
+{% if 'start' in dhcp and 'end' in dhcp %}
+dhcp-range=interface:{{ dhcp.interface }},{{ network.network | ipaddr(dhcp.start) | ipv4('address') }},{{ network.network | ipaddr(dhcp.end) | ipaddr('address') }},6h
+{% else %}
+dhcp-range=interface:{{ dhcp.interface }},{{ network.router }},static,{{ network.network | ipv4('netmask') }}
+{% endif %}
+
+domain={{ network.subdomain }}.{{ domain }},{{ network.network | ipv4('net') }},local
+
+{% if 'extra_opts' in dhcp %}
+{% for opt in dhcp.extra_opts %}
+{{ opt }}
+{% endfor %}
+{% endif %}

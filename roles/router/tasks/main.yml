@@ -1,0 +1,68 @@
+---
+- name: Update APK cache
+  apk:
+    update_cache: yes
+  changed_when: false
+
+- name: Ensure router packages are installed
+  apk:
+    name:
+      - bridge
+      - bridge-utils
+      - dnsmasq
+      - ethtool
+      - net-tools
+      - nftables
+      - vlan
+    state: present
+
+- name: Create interfaces file
+  template:
+    src: interface.j2
+    dest: /etc/network/interfaces
+    owner: root
+    group: root
+    mode: 0644
+    validate: "/sbin/ifup -i %s -n lo"
+  notify: activate interfaces
+
+- name: Generate /etc/hosts
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart dnsmasq
+
+- name: Generate /etc/ethers
+  template:
+    src: ethers.j2
+    dest: /etc/ethers
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - reload ethers
+    - restart dnsmasq
+
+# TODO: `arp -f /etc/ethers` in /etc/rc.local
+
+- name: Enable IPv4 forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Start sysctl on boot
+  service:
+    name: sysctl
+    runlevel: boot
+    enabled: true
+    state: started
+
+- name: Configure dnsmasq
+  include_tasks: dnsmasq.yml

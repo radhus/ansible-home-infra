@@ -1,0 +1,7 @@
+# NOTE: {{ ansible_managed }}
+{% for network in dhcp_networks.keys() %}
+{% for device in networks[network].devices if device.mac is string %}
+{{ device.mac }} {{ device.host }}.{{ networks[network].subdomain }}.{{ domain }}
+{% endfor %}
+
+{% endfor %}

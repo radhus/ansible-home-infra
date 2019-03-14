@@ -1,0 +1,10 @@
+# NOTE: {{ ansible_managed }}
+127.0.0.1 {{ hostname }} {{ hostname_short }} localhost.localdomain localhost
+::1 localhost localhost.localdomain
+
+{% for network in dhcp_networks.keys() %}
+{% for device in networks[network].devices if device.ip is string %}
+{{ device.ip }} {{ device.host }}.{{ networks[network].subdomain }}.{{ domain }}
+{% endfor %}
+
+{% endfor %}

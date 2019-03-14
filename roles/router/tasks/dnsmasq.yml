@@ -1,0 +1,25 @@
+---
+- name: Install dnsmasq base configuration
+  copy:
+    src: dnsmasq-base.conf
+    dest: /etc/dnsmasq.d/00-base.conf
+    owner: root
+    group: root
+    mode: 0644
+    validate: 'dnsmasq --test -C %s'
+  notify: restart dnsmasq
+
+- name: Generate dnsmasq interface configuration
+  template:
+    src: dnsmasq-interface.conf.j2
+    dest: /etc/dnsmasq.d/10-{{ item.key }}.conf
+    validate: 'dnsmasq --test -C %s'
+  with_dict: "{{ dhcp_networks }}"
+  notify: restart dnsmasq
+
+- name: Generate dnsmasq extra configuration
+  template:
+    src: dnsmasq-extra.conf.j2
+    dest: /etc/dnsmasq.d/99-extra.conf
+    validate: 'dnsmasq --test -C %s'
+  notify: restart dnsmasq
