@@ -1,9 +1,17 @@
+# Set to true to update packages and kernel
 alpine_update: false
+
+# Abort if lbu is dirty
 alpine_abort_dirty: true
 
+# Kernel version to build
 alpine_version: edge
-alpine_xen: false
+
+# Additional modules to include in kernel
 alpine_modules: []
+
+# Install Xen dom0
+alpine_xen: false
 
 updater_args_xen: []
 updater_args_modules: []
