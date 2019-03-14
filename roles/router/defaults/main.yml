@@ -1,0 +1,49 @@
+## Per site
+
+# Site domain
+domain: ""
+
+# Networks and hosts
+# Example:
+#  networks:
+#    mgmt:
+#      subdomain: mgmt
+#      network: 192.168.0.0/24
+#      router: 192.168.0.1
+#      devices:
+#        - host: client
+#          ip: 192.168.0.2
+#          mac: 01:23:45:67:89:ab  # optional
+networks: {}
+
+## Per router
+
+# hostname: ""
+# hostname_short: ""
+
+# DHCP server networks
+# Example:
+#  dhcp_networks:
+#    mgmt:  # match network in networks
+#      interface: eth1
+#      extra_opts:  # dnsmasq options
+#        - "dhcp-option=interface:eth1,vendor:ubnt,1,192.168.0.3"
+#      # start and stop are optional
+#      start: 50
+#      end: 200
+dhcp_networks: {}
+
+# Extra dnsmasq options
+dnsmasq_extra: []
+
+# /etc/interfaces configuration
+# Example:
+#  interfaces:
+#    eth1:
+#      inet: static
+#      address: 192.168.0.1
+#      netmask: 255.255.255.0
+#      up: ip link set eth1 up
+#      post-up:
+#        - ip route add 192.168.1.0/24 via 192.168.1.4
+interfaces: {}
