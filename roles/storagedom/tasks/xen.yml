@@ -2,25 +2,12 @@
 - name: Update APT cache
   apt: update_cache=yes
 
-# TODO: should be done in a better way...
-- name: Ensure services not running during installation
-  copy:
-    dest: /usr/sbin/policy-rc.d
-    mode: 0755
-    content: |
-      #!/bin/sh
-      exit 101
-
 - name: Install Xen packages
   apt:
-    name: xen-utils-4.8
+    name: xen-utils-4.11
     state: present
     install_recommends: no
-
-- name: Allow services again
-  file:
-    path: /usr/sbin/policy-rc.d
-    state: absent
+    policy_rc_d: 101
 
 - name: Disable Xen services adapted to dom0's
   service:
@@ -49,7 +36,7 @@
 
       [Service]
       Type=simple
-      ExecStart=/usr/lib/xen-4.8/bin/xl devd -F
+      ExecStart=/usr/lib/xen-4.11/bin/xl devd -F
       Restart=always
 
       [Install]

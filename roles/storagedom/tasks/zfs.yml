@@ -1,0 +1,41 @@
+---
+- name: Update APT cache
+  apt: update_cache=yes
+
+- name: Ensure stretch-backports repository is enabled
+  apt_repository:
+    repo: deb http://deb.debian.org/debian buster contrib
+    state: present
+    filename: contrib
+    update_cache: yes
+
+#- name: Ensure linux-headers are installed
+#  apt:
+#    name: "linux-headers"
+#    state: present
+
+# TODO: seems to require zfsutils to be installed first?
+- name: Ensure ZFS packages are installed
+  apt:
+    name:
+      - zfs-dkms
+    state: present
+
+- name: Build module params
+  set_fact:
+    options: "{{ options | default('') }}{{ item.key }}={{ item.value }} "
+  with_dict: "{{ zfs_module_options }}"
+
+- name: Load ZFS modules
+  modprobe:
+    name: zfs
+    state: present
+    params: "{{ options }}"
+
+- name: Persist ZFS module options
+  copy:
+    content: "options zfs {{ options }}"
+    dest: /etc/modprobe.d/zfs.conf
+    mode: 0644
+    owner: root
+    group: root

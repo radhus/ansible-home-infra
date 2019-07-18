@@ -17,8 +17,8 @@
       - smartmontools
     state: present
 
-- name: Install and load ZFS
-  include: install-zfs.yml
+- name: Install, configure and load ZFS
+  include: zfs.yml
 
 - name: Install and configure Xen storage domain packages
-  include: install-xen-packages.yml
+  include: xen.yml
